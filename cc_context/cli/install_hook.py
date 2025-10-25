@@ -9,10 +9,11 @@ This command installs two git hooks:
 
 import sys
 import subprocess
+import argparse
 from pathlib import Path
 
 
-def install_hook():
+def install_hook(force: bool = False):
     """Install git hooks to current repository"""
     try:
         from cc_context.utils.path import get_repo_root
@@ -63,18 +64,30 @@ exit 0
 
         # Check if post-commit hook already exists
         if post_commit_hook.exists():
-            print(f"⚠️  Post-commit hook already exists at: {post_commit_hook}")
-            response = input("   Overwrite existing post-commit hook? [y/N] ").strip().lower()
-            if response != 'y':
-                print("   Skipped post-commit hook installation")
-            else:
-                # Backup existing hook
+            if force:
+                # Force flag: overwrite without asking
                 backup_path = post_commit_hook.with_suffix(".backup")
                 post_commit_hook.rename(backup_path)
-                print(f"   Backed up existing hook to: {backup_path}")
+                print(f"✓  Backed up existing hook to: {backup_path}")
                 post_commit_hook.write_text(post_commit_content)
                 post_commit_hook.chmod(0o755)
                 print(f"✓  Installed post-commit hook")
+            else:
+                print(f"⚠️  Post-commit hook already exists at: {post_commit_hook}")
+                try:
+                    response = input("   Overwrite existing post-commit hook? [y/N] ").strip().lower()
+                    if response == 'y':
+                        # Backup existing hook
+                        backup_path = post_commit_hook.with_suffix(".backup")
+                        post_commit_hook.rename(backup_path)
+                        print(f"   Backed up existing hook to: {backup_path}")
+                        post_commit_hook.write_text(post_commit_content)
+                        post_commit_hook.chmod(0o755)
+                        print(f"✓  Installed post-commit hook")
+                    else:
+                        print("   Skipped post-commit hook installation")
+                except EOFError:
+                    print("\n   Skipped post-commit hook installation (use --force to overwrite)")
         else:
             post_commit_hook.write_text(post_commit_content)
             post_commit_hook.chmod(0o755)
@@ -82,18 +95,30 @@ exit 0
 
         # Check if post-checkout hook already exists
         if post_checkout_hook.exists():
-            print(f"⚠️  Post-checkout hook already exists at: {post_checkout_hook}")
-            response = input("   Overwrite existing post-checkout hook? [y/N] ").strip().lower()
-            if response != 'y':
-                print("   Skipped post-checkout hook installation")
-            else:
-                # Backup existing hook
+            if force:
+                # Force flag: overwrite without asking
                 backup_path = post_checkout_hook.with_suffix(".backup")
                 post_checkout_hook.rename(backup_path)
-                print(f"   Backed up existing hook to: {backup_path}")
+                print(f"✓  Backed up existing hook to: {backup_path}")
                 post_checkout_hook.write_text(post_checkout_content)
                 post_checkout_hook.chmod(0o755)
                 print(f"✓  Installed post-checkout hook")
+            else:
+                print(f"⚠️  Post-checkout hook already exists at: {post_checkout_hook}")
+                try:
+                    response = input("   Overwrite existing post-checkout hook? [y/N] ").strip().lower()
+                    if response == 'y':
+                        # Backup existing hook
+                        backup_path = post_checkout_hook.with_suffix(".backup")
+                        post_checkout_hook.rename(backup_path)
+                        print(f"   Backed up existing hook to: {backup_path}")
+                        post_checkout_hook.write_text(post_checkout_content)
+                        post_checkout_hook.chmod(0o755)
+                        print(f"✓  Installed post-checkout hook")
+                    else:
+                        print("   Skipped post-checkout hook installation")
+                except EOFError:
+                    print("\n   Skipped post-checkout hook installation (use --force to overwrite)")
         else:
             post_checkout_hook.write_text(post_checkout_content)
             post_checkout_hook.chmod(0o755)
@@ -132,7 +157,17 @@ exit 0
 
 
 def main():
-    sys.exit(install_hook())
+    parser = argparse.ArgumentParser(
+        description="Install git hooks for automatic Claude Code context capture"
+    )
+    parser.add_argument(
+        "--force", "-f",
+        action="store_true",
+        help="Overwrite existing hooks without prompting"
+    )
+
+    args = parser.parse_args()
+    sys.exit(install_hook(force=args.force))
 
 
 if __name__ == "__main__":
