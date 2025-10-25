@@ -11,7 +11,8 @@ import {
   Users,
   Settings,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  GitGraph
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
@@ -22,6 +23,7 @@ interface SidebarProps {
 
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Git Graph", href: "/graph", icon: GitGraph },
   { name: "Contexts", href: "/contexts", icon: MessageSquare },
   { name: "Repositories", href: "/repositories", icon: FolderGit2 },
   { name: "Teams", href: "/teams", icon: Users },
