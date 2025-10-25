@@ -1,0 +1,10 @@
+.cc-context/
+.cc-contexts/
+*.pyc
+__pycache__/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.venv/
+venv/

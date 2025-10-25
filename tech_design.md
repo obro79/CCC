@@ -160,6 +160,12 @@ repository-root/
 {"type":"user","content":"Add logging","timestamp":"14:20:10","uuid":"b1","parentUuid":"b0"}
 ```
 
+Claude stores session history in a .claude/-{cwd}-{repo_name}/{session_id}.jsonl
+Every commit, this should track the current hash of all the session jsonl files in that project. Also on every commit, it should find which jsonl files hash has changed since the last commit, and append all the changed jsonl (chronologically) to one context file, and link that context file to the git commit.
+
+Therefore, for every commit, there will be 0 or 1 claude context files which are associated with that commit.
+
+
 ---
 
 ## Core Workflows
@@ -534,3 +540,5 @@ This system bridges the gap between ephemeral AI conversations and permanent ver
 - **Continuity:** Never lose productive conversations
 - **Collaboration:** Share AI reasoning with team members
 - **History:** Track how conversations evolved with code
+
+
