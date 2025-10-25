@@ -8,13 +8,15 @@ def encode_path(repo_path: str) -> str:
     return encoded
 
 
-def get_claude_storage_path(repo_path: str) -> Path:
+def get_claude_storage_path() -> Path:
     home = Path.home()
-    encoded = encode_path(repo_path)
+    encoded = encode_path(get_repo_root())
     return home / ".claude" / "projects" / encoded
 
 
 def get_repo_root() -> Path:
+    # /Users/aaryanrampal/personal/programs/ccc
+    # The cwd of the git repository that you are on
     import subprocess
     result = subprocess.run(
         ["git", "rev-parse", "--show-toplevel"],
@@ -25,13 +27,6 @@ def get_repo_root() -> Path:
     return Path(result.stdout.strip())
 
 
-def get_snapshots_dir(repo_path: Path | None = None) -> Path:
-    if repo_path is None:
-        repo_path = get_repo_root()
-    return repo_path / ".cc-snapshots"
-
-
-def get_context_dir(repo_path: Path | None = None) -> Path:
-    if repo_path is None:
-        repo_path = get_repo_root()
+def get_context_dir() -> Path:
+    repo_path = get_repo_root()
     return repo_path / ".cc-context"
