@@ -9,7 +9,8 @@ setup(
     install_requires=[],
     entry_points={
         "console_scripts": [
-            "cc-capture=cc_context.git_hooks.pre_commit:main",
+            "cc-init=cc_context.cli.init:main",
+            "cc-capture=cc_context.git_hooks.post_commit:main",
             "cc-install-hook=cc_context.cli.install_hook:main",
             "cc-status=cc_context.cli.status:main",
             "cc-restore=cc_context.cli.restore:main",
