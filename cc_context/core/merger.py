@@ -4,50 +4,39 @@ from cc_context.core.session import SessionInfo
 
 
 def merge_sessions(sessions: List[SessionInfo]) -> List[Message]:
-    all_messages = []
-    session_boundaries = {}
-    
+    # Sessions are already sorted by modified_time from discover_sessions()
+    # Process sessions in order without interleaving individual messages
+    merged = []
+    prev_uuid = None
+
     for session in sessions:
         messages = parse_jsonl_file(session.file_path)
         session.message_count = len(messages)
-        
+
+        # Add session boundary marker (except for first session)
+        if len(merged) > 0:
+            boundary_msg = Message(
+                type="system",
+                content=f"--- USER STARTED NEW SESSION ({session.session_id}) ---",
+                timestamp=messages[0].timestamp if messages else session.modified_time,
+                uuid=f"boundary-{session.session_id}",
+                parent_uuid=prev_uuid
+            )
+            merged.append(boundary_msg)
+            prev_uuid = boundary_msg.uuid
+
+        # Add all messages from this session
         for msg in messages:
-            msg_dict = msg.to_dict()
-            msg_dict['_session_id'] = session.session_id
-            all_messages.append((msg, msg_dict))
-    
-    all_messages.sort(key=lambda x: x[0].timestamp)
-    
-    merged = []
-    current_session = None
-    prev_uuid = None
-    
-    for msg, msg_dict in all_messages:
-        session_id = msg_dict['_session_id']
-        
-        if current_session != session_id:
-            if current_session is not None:
-                boundary_msg = Message(
-                    type="system",
-                    content=f"--- USER STARTED NEW SESSION ({session_id}) ---",
-                    timestamp=msg.timestamp,
-                    uuid=f"boundary-{session_id}",
-                    parent_uuid=prev_uuid
-                )
-                merged.append(boundary_msg)
-                prev_uuid = boundary_msg.uuid
-            current_session = session_id
-        
-        relinked_msg = Message(
-            type=msg.type,
-            content=msg.content,
-            timestamp=msg.timestamp,
-            uuid=msg.uuid,
-            parent_uuid=prev_uuid if prev_uuid else None
-        )
-        merged.append(relinked_msg)
-        prev_uuid = relinked_msg.uuid
-    
+            relinked_msg = Message(
+                type=msg.type,
+                content=msg.content,
+                timestamp=msg.timestamp,
+                uuid=msg.uuid,
+                parent_uuid=prev_uuid if prev_uuid else None
+            )
+            merged.append(relinked_msg)
+            prev_uuid = relinked_msg.uuid
+
     return merged
 
 
