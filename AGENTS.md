@@ -58,7 +58,8 @@ This file helps AI agents efficiently navigate the codebase with minimal token u
 
 | File | Responsibility |
 |------|----------------|
-| cc_context/git_hooks/pre_commit.py | Entry point, orchestrates capture workflow |
+| cc_context/cli/install_hook.py | Installs git hooks (post-commit, post-checkout) |
+| cc_context/git_hooks/pre_commit.py | Capture workflow implementation (called by hooks) |
 | cc_context/core/session.py | Discovers Claude sessions, hashes files |
 | cc_context/core/parser.py | Parses and validates JSONL |
 | cc_context/core/merger.py | Merges multiple sessions chronologically |
@@ -116,10 +117,13 @@ pip install -e .           # Install package
 python test_utils.py       # Run all tests
 ```
 
-## CLI Commands (Planned)
+## CLI Commands
 
-- cc-capture - Capture context (implemented in pre_commit.py)
-- cc-status - Show context state (not implemented)
-- cc-restore - Restore context (not implemented)
-- cc-list - List commits with contexts (not implemented)
-- cc-diff - Compare contexts (not implemented)
+### Implemented
+- **cc-install-hook** - Install git hooks for automatic capture (cc_context/cli/install_hook.py)
+- **cc-capture** - Manual context capture (cc_context/git_hooks/pre_commit.py)
+
+### Planned/Stubbed
+- **cc-status** - Show context state (entry point registered, implementation needed)
+- **cc-restore** - Restore context (entry point registered, implementation needed)
+- **cc-list** - List commits with contexts (entry point registered, implementation needed)

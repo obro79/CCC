@@ -62,7 +62,7 @@ print_session_info()
 
 ### Capturing Context on Commit
 
-The package can be called manually or via git pre-commit hook:
+The package can be called manually or via git post-commit hook:
 
 ```bash
 # Manual capture
@@ -72,18 +72,34 @@ cc-capture
 python -m cc_context.git_hooks.pre_commit
 ```
 
-### Setting up Git Hook
+### Setting up Git Hooks
 
-To automatically capture context on every commit:
+To automatically capture context after every commit:
 
 ```bash
-# Copy pre-commit hook
-cat > .git/hooks/pre-commit << 'EOF'
+# Automated installation (recommended)
+cc-install-hook
+
+# Force installation without prompts (for CI/scripts)
+cc-install-hook --force
+```
+
+This installs two git hooks:
+- **post-commit**: Automatically captures Claude Code context after each commit
+- **post-checkout**: Notifies when context is available after checking out a commit
+
+#### Manual Hook Installation (Alternative)
+
+```bash
+# Create post-commit hook
+cat > .git/hooks/post-commit << 'EOF'
 #!/bin/bash
+echo "📸 Capturing Claude Code context..."
 cc-capture
+exit 0
 EOF
 
-chmod +x .git/hooks/pre-commit
+chmod +x .git/hooks/post-commit
 ```
 
 ## Package Structure

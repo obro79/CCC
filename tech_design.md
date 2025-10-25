@@ -29,7 +29,7 @@ Git-integrated system that captures Claude Code conversation history at commit p
 repository-root/
 ├── .git/
 │   └── hooks/
-│       ├── pre-commit           # Captures context
+│       ├── post-commit          # Captures context after commit
 │       └── post-checkout        # Notifies context available
 │
 ├── .cc-snapshots/               # Git-tracked metadata only
@@ -172,7 +172,9 @@ Therefore, for every commit, there will be 0 or 1 claude context files which are
 
 ### Workflow 1: Context Capture on Commit
 
-**Trigger:** Git `pre-commit` hook
+**Trigger:** Git `post-commit` hook
+
+**Design Note:** Uses `post-commit` instead of `pre-commit` to prioritize reliability - commits always succeed even if context capture fails. The commit is already created when context is captured, ensuring git operations are never blocked.
 
 **Steps:**
 
@@ -387,6 +389,19 @@ def fetch_context(context_id: str) -> str
 
 ## CLI Commands
 
+### `cc-install-hook`
+Install git hooks for automatic context capture
+```bash
+$ cc-install-hook
+✓  Installed post-commit hook at: .git/hooks/post-commit
+✓  Installed post-checkout hook at: .git/hooks/post-checkout
+
+🎉 Git hooks installed successfully!
+
+# Force installation without prompts
+$ cc-install-hook --force
+```
+
 ### `cc-status`
 Show current context state
 ```bash
@@ -438,7 +453,8 @@ Delta: +19 messages, +1 session
 ## Implementation Phases
 
 ### Phase 1: Core Capture (Hours 0-8)
-- Git pre-commit hook
+- Git post-commit hook
+- Hook installer (`cc-install-hook`)
 - Session discovery (mtime-based)
 - Single session capture
 - JSONL parsing
