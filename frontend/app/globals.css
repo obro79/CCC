@@ -49,6 +49,18 @@
   --brand-orange-hover: #a84f2f;
   --brand-orange-active: #8f4226;
 
+  /* Claude Code UI Colors (from interface screenshot) */
+  --claude-code-bg-primary: #F5F3F0;
+  --claude-code-bg-secondary: #E8E5E0;
+  --claude-code-accent-coral: #E8A598;
+  --claude-code-accent-coral-hover: #E09486;
+  --claude-code-accent-coral-active: #D88374;
+  --claude-code-accent-orange: #D97757;
+  --claude-code-accent-orange-dark: #8B4513;
+  --claude-code-text-secondary: #6B6B6B;
+  --claude-code-text-placeholder: #999999;
+  --claude-code-border: #D9D6D1;
+
   /* Blue Accents for Links & Secondary Actions */
   --blue-primary: #096BFF;
   --blue-hover: #0056D6;
