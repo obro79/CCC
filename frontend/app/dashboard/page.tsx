@@ -100,7 +100,8 @@ export default async function DashboardPage() {
             <h2 className="text-2xl font-semibold">Recent Contexts</h2>
             <a
               href="/contexts"
-              className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+              className="text-sm hover:underline"
+              style={{color: 'var(--blue-primary)'}}
             >
               View all →
             </a>

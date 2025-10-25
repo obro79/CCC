@@ -43,7 +43,7 @@ export function ContextCard({
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
-                <code className="text-sm font-mono text-purple-600 dark:text-purple-400">
+                <code className="text-sm font-mono text-chart-3">
                   {shortSha}
                 </code>
                 <p className="text-xs text-muted-foreground mt-1">{timeAgo}</p>
@@ -83,7 +83,7 @@ export function ContextCard({
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0 space-y-2">
               <div className="flex items-center gap-2">
-                <code className="text-sm font-mono text-purple-600 dark:text-purple-400 font-medium">
+                <code className="text-sm font-mono text-chart-3 font-medium">
                   {shortSha}
                 </code>
                 <Badge variant="secondary" className="text-xs">

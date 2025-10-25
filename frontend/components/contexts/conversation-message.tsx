@@ -27,12 +27,12 @@ export function ConversationMessage({
     )
   }
 
-  // User messages (right-aligned, blue accent)
+  // User messages (right-aligned, Claude's blue accent)
   if (type === "user") {
     return (
       <div className={cn("flex justify-end gap-3 py-4", className)}>
         <div className="flex max-w-[80%] flex-col items-end gap-2">
-          <div className="rounded-2xl rounded-tr-sm bg-blue-600 px-4 py-3 text-white shadow-sm">
+          <div className="rounded-2xl rounded-tr-sm px-4 py-3 text-white shadow-sm" style={{backgroundColor: 'var(--blue-primary)'}}>
             <p className="whitespace-pre-wrap text-sm leading-relaxed">
               {content}
             </p>
@@ -42,7 +42,7 @@ export function ConversationMessage({
           )}
         </div>
         <Avatar className="h-8 w-8 shrink-0">
-          <AvatarFallback className="bg-blue-600 text-white text-xs">
+          <AvatarFallback className="text-white text-xs" style={{backgroundColor: 'var(--blue-primary)'}}>
             U
           </AvatarFallback>
         </Avatar>
