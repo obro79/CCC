@@ -1,6 +1,5 @@
 "use client"
 
-import { Gitgraph, templateExtend, TemplateName } from "@gitgraph/react"
 import { Context } from "@/lib/mock-data"
 import { Card } from "@/components/ui/card"
 
@@ -10,33 +9,37 @@ export interface GitGraphViewerProps {
 }
 
 export function GitGraphViewer({ contexts, onCommitClick }: GitGraphViewerProps) {
-  // Sort contexts chronologically to build graph in order
+  // Sort contexts chronologically
   const sortedContexts = [...contexts].sort(
     (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
   )
 
-  // Custom template matching Claude design system
-  const claudeTemplate = templateExtend(TemplateName.Metro, {
-    colors: ["#2563eb", "#f97316"], // Blue for git, orange for claude
-    branch: {
-      lineWidth: 3,
-      spacing: 60,
-      label: {
-        font: "bold 12px 'Geist Sans', sans-serif",
-      },
-    },
-    commit: {
-      spacing: 80,
-      dot: {
-        size: 10,
-      },
-      message: {
-        displayAuthor: false,
-        displayHash: false,
-        font: "normal 12px 'Geist Sans', sans-serif",
-      },
-    },
-  })
+  // Layout constants
+  const commitRadius = 8
+  const gitX = 100 // X position for git timeline
+  const claudeX = 350 // X position for claude timeline
+  const commitSpacing = 80 // Vertical spacing between commits
+  const paddingTop = 40
+  const paddingBottom = 40
+
+  const svgHeight = sortedContexts.length * commitSpacing + paddingTop + paddingBottom
+
+  // Generate paths for connections
+  const generateHorizontalPath = (gitY: number, claudeY: number) => {
+    // Bezier curve from git to claude (curving down)
+    const midX = (gitX + claudeX) / 2
+    return `M ${gitX} ${gitY} C ${midX} ${gitY}, ${midX} ${claudeY}, ${claudeX} ${claudeY}`
+  }
+
+  const generateMergePath = (claudeY: number, gitY: number) => {
+    // Bezier curve from claude back to git
+    const midX = (claudeX + gitX) / 2
+    return `M ${claudeX} ${claudeY} C ${midX} ${claudeY}, ${midX} ${gitY}, ${gitX} ${gitY}`
+  }
+
+  // Track active session for visualization
+  let activeSessionStart: number | null = null
+  let lastClaudeY: number | null = null
 
   return (
     <Card className="p-6 overflow-x-auto">
@@ -50,103 +53,201 @@ export function GitGraphViewer({ contexts, onCommitClick }: GitGraphViewerProps)
           <span className="text-muted-foreground">Claude contexts</span>
         </div>
       </div>
-      <div className="min-w-[700px]">
-        <Gitgraph options={{ template: claudeTemplate }}>
-          {(gitgraph) => {
-            // Create main git branch (bottom)
-            const gitBranch = gitgraph.branch({
-              name: "main",
-              style: {
-                label: {
-                  color: "#2563eb",
-                  strokeColor: "#2563eb",
-                  bgColor: "#dbeafe",
-                },
-              },
-            })
 
-            // Create claude branch (top)
-            const claudeBranch = gitgraph.branch({
-              name: "claude",
-              style: {
-                label: {
-                  color: "#f97316",
-                  strokeColor: "#f97316",
-                  bgColor: "#ffedd5",
-                },
-              },
-            })
+      <div className="min-w-[500px]">
+        <svg width="100%" height={svgHeight} className="overflow-visible">
+          {/* Git timeline (vertical line) */}
+          <line
+            x1={gitX}
+            y1={paddingTop}
+            x2={gitX}
+            y2={svgHeight - paddingBottom}
+            stroke="#3b82f6"
+            strokeWidth="3"
+          />
 
-            sortedContexts.forEach((context, index) => {
-              const shortSha = context.commit_sha.slice(0, 7)
-              const hasContext = context.total_messages > 0
+          {/* Branch labels */}
+          <g>
+            <rect
+              x={gitX - 35}
+              y={10}
+              width="70"
+              height="24"
+              rx="12"
+              fill="#dbeafe"
+              stroke="#2563eb"
+              strokeWidth="2"
+            />
+            <text
+              x={gitX}
+              y={25}
+              textAnchor="middle"
+              fill="#2563eb"
+              fontSize="12"
+              fontWeight="bold"
+            >
+              main
+            </text>
+          </g>
 
-              // Add git commit on main branch
-              gitBranch.commit({
-                subject: shortSha,
-                author: context.author_email.split('@')[0],
-                style: {
-                  dot: {
-                    color: "#3b82f6",
-                    strokeColor: "#2563eb",
-                    strokeWidth: 2,
-                  },
-                  message: {
-                    color: "#1e40af",
-                  },
-                },
-                onClick: () => {
-                  if (onCommitClick && !hasContext) {
-                    onCommitClick(context)
-                  }
-                },
-              })
+          <g>
+            <rect
+              x={claudeX - 40}
+              y={10}
+              width="80"
+              height="24"
+              rx="12"
+              fill="#ffedd5"
+              stroke="#f97316"
+              strokeWidth="2"
+            />
+            <text
+              x={claudeX}
+              y={25}
+              textAnchor="middle"
+              fill="#f97316"
+              fontSize="12"
+              fontWeight="bold"
+            >
+              claude
+            </text>
+          </g>
 
-              // If this commit has Claude context, add it to claude branch
-              if (hasContext) {
-                claudeBranch.commit({
-                  subject: `💬 ${context.total_messages} messages`,
-                  author: context.author_email.split('@')[0],
-                  style: {
-                    dot: {
-                      color: "#f97316",
-                      strokeColor: "#ea580c",
-                      strokeWidth: 2,
-                    },
-                    message: {
-                      color: "#9a3412",
-                      font: "bold 12px 'Geist Sans', sans-serif",
-                    },
-                  },
-                  onClick: () => {
-                    if (onCommitClick) {
-                      onCommitClick(context)
-                    }
-                  },
-                  onMessageClick: () => {
-                    if (onCommitClick) {
-                      onCommitClick(context)
-                    }
-                  },
-                })
+          {/* Render commits and connections */}
+          {sortedContexts.map((context, index) => {
+            const y = paddingTop + index * commitSpacing
+            const shortSha = context.commit_sha.slice(0, 7)
+            const hasContext = context.total_messages > 0
+            const nextContext = sortedContexts[index + 1]
 
-                // Merge back to main to show connection
-                claudeBranch.merge(gitBranch, {
-                  commitOptions: {
-                    style: {
-                      dot: {
-                        size: 0, // Hide the merge commit dot
-                      },
-                      message: {
-                        display: false, // Hide merge message
-                      },
-                    },
-                  },
-                })
-              }
-            })
-          }}
-        </Gitgraph>
+            // Determine if we should merge and/or branch
+            const shouldMerge = hasContext && activeSessionStart !== null && (
+              !nextContext ||
+              (nextContext.total_messages > 0 && nextContext.new_session)
+            )
+
+            const shouldBranch = hasContext && context.new_session
+
+            return (
+              <g key={context.commit_sha}>
+                {/* Draw merge line before new branch */}
+                {shouldMerge && lastClaudeY !== null && shouldBranch && (
+                  <path
+                    d={generateMergePath(lastClaudeY, y)}
+                    fill="none"
+                    stroke="#f97316"
+                    strokeWidth="3"
+                    opacity="0.8"
+                  />
+                )}
+
+                {/* Draw horizontal branch line for new session */}
+                {shouldBranch && (
+                  <>
+                    <path
+                      d={generateHorizontalPath(y, y)}
+                      fill="none"
+                      stroke="#f97316"
+                      strokeWidth="3"
+                      opacity="0.8"
+                    />
+                    {(() => {
+                      activeSessionStart = y
+                      lastClaudeY = y
+                      return null
+                    })()}
+                  </>
+                )}
+
+                {/* Draw vertical line for continued session */}
+                {hasContext && !context.new_session && lastClaudeY !== null && (
+                  <>
+                    <line
+                      x1={claudeX}
+                      y1={lastClaudeY}
+                      x2={claudeX}
+                      y2={y}
+                      stroke="#f97316"
+                      strokeWidth="3"
+                    />
+                    {(() => {
+                      lastClaudeY = y
+                      return null
+                    })()}
+                  </>
+                )}
+
+                {/* Draw merge line at end of session */}
+                {shouldMerge && lastClaudeY !== null && !shouldBranch && (
+                  <>
+                    <path
+                      d={generateMergePath(lastClaudeY, y)}
+                      fill="none"
+                      stroke="#f97316"
+                      strokeWidth="3"
+                      opacity="0.8"
+                    />
+                    {(() => {
+                      activeSessionStart = null
+                      lastClaudeY = null
+                      return null
+                    })()}
+                  </>
+                )}
+
+                {/* Git commit circle */}
+                <circle
+                  cx={gitX}
+                  cy={y}
+                  r={commitRadius}
+                  fill="#3b82f6"
+                  stroke="#2563eb"
+                  strokeWidth="2"
+                  className="cursor-pointer hover:fill-blue-700 transition-colors"
+                  onClick={() => onCommitClick && !hasContext && onCommitClick(context)}
+                />
+
+                {/* Git commit SHA label */}
+                <text
+                  x={gitX + commitRadius + 10}
+                  y={y + 4}
+                  fill="#1e40af"
+                  fontSize="14"
+                  fontFamily="monospace"
+                >
+                  {shortSha}
+                </text>
+
+                {/* Claude commit circle */}
+                {hasContext && (
+                  <>
+                    <circle
+                      cx={claudeX}
+                      cy={y}
+                      r={commitRadius}
+                      fill="#f97316"
+                      stroke="#ea580c"
+                      strokeWidth="2"
+                      className="cursor-pointer hover:fill-orange-600 transition-colors"
+                      onClick={() => onCommitClick && onCommitClick(context)}
+                    />
+
+                    {/* Claude message count label */}
+                    <text
+                      x={claudeX + commitRadius + 10}
+                      y={y + 4}
+                      fill="#9a3412"
+                      fontSize="14"
+                      fontWeight="bold"
+                    >
+                      💬 {context.total_messages} messages
+                    </text>
+                  </>
+                )}
+              </g>
+            )
+          })}
+        </svg>
       </div>
     </Card>
   )
