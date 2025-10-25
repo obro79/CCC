@@ -19,6 +19,7 @@ export function GitGraphViewer({ contexts, onCommitClick }: GitGraphViewerProps)
   const gitX = 100 // X position for git timeline
   const claudeX = 350 // X position for claude timeline
   const commitSpacing = 80 // Vertical spacing between commits
+  const quadYOffset = 35 // Vertical offset for quad/claude timeline (creates tan-like curve)
   const paddingTop = 40
   const paddingBottom = 40
 
@@ -26,15 +27,26 @@ export function GitGraphViewer({ contexts, onCommitClick }: GitGraphViewerProps)
 
   // Generate paths for connections
   const generateHorizontalPath = (gitY: number, claudeY: number) => {
-    // Bezier curve from git to claude (curving down)
+    // Tan-like curve from git to claude (curving down smoothly)
+    // Create a smooth downward curve using cubic Bezier with offset control points
     const midX = (gitX + claudeX) / 2
-    return `M ${gitX} ${gitY} C ${midX} ${gitY}, ${midX} ${claudeY}, ${claudeX} ${claudeY}`
+    const controlOffset = 25 // How much the curve bows down
+    const control1X = gitX + (claudeX - gitX) * 0.3
+    const control1Y = gitY + controlOffset
+    const control2X = gitX + (claudeX - gitX) * 0.7
+    const control2Y = claudeY + controlOffset
+    return `M ${gitX} ${gitY} C ${control1X} ${control1Y}, ${control2X} ${control2Y}, ${claudeX} ${claudeY}`
   }
 
   const generateMergePath = (claudeY: number, gitY: number) => {
-    // Bezier curve from claude back to git
+    // Tan-like curve from claude back to git (curving up smoothly)
     const midX = (claudeX + gitX) / 2
-    return `M ${claudeX} ${claudeY} C ${midX} ${claudeY}, ${midX} ${gitY}, ${gitX} ${gitY}`
+    const controlOffset = 25 // How much the curve bows up
+    const control1X = claudeX - (claudeX - gitX) * 0.3
+    const control1Y = claudeY - controlOffset
+    const control2X = claudeX - (claudeX - gitX) * 0.7
+    const control2Y = gitY - controlOffset
+    return `M ${claudeX} ${claudeY} C ${control1X} ${control1Y}, ${control2X} ${control2Y}, ${gitX} ${gitY}`
   }
 
   // Track active session for visualization
@@ -145,7 +157,7 @@ export function GitGraphViewer({ contexts, onCommitClick }: GitGraphViewerProps)
                 {shouldBranch && (
                   <>
                     <path
-                      d={generateHorizontalPath(y, y)}
+                      d={generateHorizontalPath(y, y + quadYOffset)}
                       fill="none"
                       stroke="#f97316"
                       strokeWidth="3"
@@ -153,7 +165,7 @@ export function GitGraphViewer({ contexts, onCommitClick }: GitGraphViewerProps)
                     />
                     {(() => {
                       activeSessionStart = y
-                      lastClaudeY = y
+                      lastClaudeY = y + quadYOffset
                       return null
                     })()}
                   </>
@@ -166,12 +178,12 @@ export function GitGraphViewer({ contexts, onCommitClick }: GitGraphViewerProps)
                       x1={claudeX}
                       y1={lastClaudeY}
                       x2={claudeX}
-                      y2={y}
+                      y2={y + quadYOffset}
                       stroke="#f97316"
                       strokeWidth="3"
                     />
                     {(() => {
-                      lastClaudeY = y
+                      lastClaudeY = y + quadYOffset
                       return null
                     })()}
                   </>
@@ -223,7 +235,7 @@ export function GitGraphViewer({ contexts, onCommitClick }: GitGraphViewerProps)
                   <>
                     <circle
                       cx={claudeX}
-                      cy={y}
+                      cy={y + quadYOffset}
                       r={commitRadius}
                       fill="#f97316"
                       stroke="#ea580c"
@@ -235,7 +247,7 @@ export function GitGraphViewer({ contexts, onCommitClick }: GitGraphViewerProps)
                     {/* Claude message count label */}
                     <text
                       x={claudeX + commitRadius + 10}
-                      y={y + 4}
+                      y={y + quadYOffset + 4}
                       fill="#9a3412"
                       fontSize="14"
                       fontWeight="bold"
