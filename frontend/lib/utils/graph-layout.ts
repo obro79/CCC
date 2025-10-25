@@ -135,23 +135,39 @@ export function calculateGraphLayout(commits: GitCommit[]): GraphData {
             fromNode: prevClaudeNode,
             toNode: prevGitNode,
           });
-        }
-      }
 
-      // Branch out from current Git to current Claude
-      if (claudeNode) {
-        connections.push({
-          type: 'branch',
-          d: generateBezierPath(
-            gitNode.x,
-            gitNode.y,
-            claudeNode.x,
-            claudeNode.y,
-            true // curve down for branch
-          ),
-          fromNode: gitNode,
-          toNode: claudeNode,
-        });
+          // Branch out from PREVIOUS Git to current Claude (new session)
+          if (claudeNode) {
+            connections.push({
+              type: 'branch',
+              d: generateBezierPath(
+                prevGitNode.x,
+                prevGitNode.y,
+                claudeNode.x,
+                claudeNode.y,
+                true // curve down for branch
+              ),
+              fromNode: prevGitNode,
+              toNode: claudeNode,
+            });
+          }
+        }
+      } else {
+        // First commit with new_session: true, branch from current Git
+        if (claudeNode) {
+          connections.push({
+            type: 'branch',
+            d: generateBezierPath(
+              gitNode.x,
+              gitNode.y,
+              claudeNode.x,
+              claudeNode.y,
+              true // curve down for branch
+            ),
+            fromNode: gitNode,
+            toNode: claudeNode,
+          });
+        }
       }
     } else {
       // Continuing session - vertical connection from previous Claude to current Claude
