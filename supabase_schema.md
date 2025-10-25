@@ -74,8 +74,7 @@ The core storage for Claude conversation JSONL data.
 
 ```sql
 CREATE TABLE contexts (
-  context_id TEXT PRIMARY KEY,  -- "ctx-550e8400"
-  repository_id UUID REFERENCES repositories(id) ON DELETE CASCADE,
+  session_id TEXT PRIMARY KEY,  -- "ctx-550e8400"
   commit_sha TEXT NOT NULL,
   parent_commit_sha TEXT,
 
