@@ -20,7 +20,9 @@ python test_utils.py
 
 This will test:
 - Path encoding utilities
-- Session merging
+- Session merging with mock data
+- Session merging with real Claude sessions
+- Session restoration to new Claude sessions
 - Metadata generation
 - Session discovery
 
@@ -32,6 +34,8 @@ You can also import and use individual test functions:
 from test_utils import (
     test_path_encoding,
     test_session_merge,
+    test_session_merge_real,
+    test_restore_merged_session,
     test_metadata_generation,
     print_session_info,
     create_test_claude_storage
@@ -40,8 +44,14 @@ from test_utils import (
 # Test path encoding
 test_path_encoding()
 
-# Test session merging
+# Test session merging with mock data
 test_session_merge()
+
+# Test session merging with real Claude sessions
+test_session_merge_real()
+
+# Test restoring merged sessions to new Claude session
+test_restore_merged_session()
 
 # Test metadata generation
 test_metadata_generation()
@@ -135,6 +145,50 @@ sessions = [
 storage_path = create_test_claude_storage(Path.cwd(), sessions)
 print(f"Created test storage at: {storage_path}")
 ```
+
+### `test_session_merge_real()`
+Tests session merging using actual Claude session files from `~/.claude/projects/` instead of mock data.
+
+```python
+from test_utils import test_session_merge_real
+
+# Test with real session data
+test_session_merge_real()
+```
+
+This will:
+- Discover actual sessions for the current repository
+- Merge them chronologically by session modified time
+- Display statistics and verify ordering
+- Show sample JSONL output
+
+### `test_restore_merged_session()`
+Creates a new resumable Claude session from merged real sessions, preserving all metadata and session boundaries.
+
+```python
+from test_utils import test_restore_merged_session
+
+# Create restored session
+new_session_id = test_restore_merged_session()
+print(f"New session created: {new_session_id}")
+```
+
+This will:
+- Read all messages from discovered sessions
+- Add session boundary markers between sessions
+- Create a new session file in `.claude/projects/`
+- Provide instructions to resume with `claude --resume {session-id}`
+
+### `run_all_tests()`
+Runs all test functions in sequence for comprehensive validation, including both mock and real session testing.
+
+```python
+from test_utils import run_all_tests
+
+run_all_tests()
+```
+
+This executes: path encoding → mock session merge → real session merge → metadata generation → session info display.
 
 ### `create_mock_session_file(session_id, message_count, base_timestamp)`
 Creates a single mock session JSONL file.
