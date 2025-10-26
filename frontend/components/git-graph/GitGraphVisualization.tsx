@@ -10,9 +10,15 @@ import { ConnectionLine } from './ConnectionLine';
 
 interface GitGraphVisualizationProps {
   commits: GitCommit[];
+  selectedCommitSha?: string | null;
+  onClaudeNodeClick?: (commitSha: string) => void;
 }
 
-export function GitGraphVisualization({ commits }: GitGraphVisualizationProps) {
+export function GitGraphVisualization({
+  commits,
+  selectedCommitSha = null,
+  onClaudeNodeClick
+}: GitGraphVisualizationProps) {
   const graphData = useMemo(() => calculateGraphLayout(commits), [commits]);
   const viewBox = useMemo(() => calculateViewBox(commits), [commits]);
 
@@ -35,7 +41,12 @@ export function GitGraphVisualization({ commits }: GitGraphVisualizationProps) {
         <GitNode key={`git-${index}`} node={node} />
       ))}
       {graphData.claudeNodes.map((node, index) => (
-        <ClaudeNode key={`claude-${index}`} node={node} />
+        <ClaudeNode
+          key={`claude-${index}`}
+          node={node}
+          isSelected={node.commit?.commit_sha === selectedCommitSha}
+          onSelect={onClaudeNodeClick}
+        />
       ))}
     </svg>
   );

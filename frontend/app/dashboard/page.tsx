@@ -21,7 +21,11 @@ export default function DashboardPage() {
           </CardHeader>
           <CardContent className="h-[600px] overflow-auto flex justify-start">
             <div className="min-w-[750px] h-[1000px]">
-              <GitGraphVisualization commits={mockGitCommits} />
+              <GitGraphVisualization
+                commits={mockGitCommits}
+                selectedCommitSha={null}
+                onClaudeNodeClick={() => {}}
+              />
             </div>
           </CardContent>
         </Card>

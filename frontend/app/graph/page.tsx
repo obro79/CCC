@@ -15,7 +15,11 @@ export default function GraphPage() {
         </header>
 
         <div className="bg-card rounded-lg border border-border p-8 shadow-sm">
-          <GitGraphVisualization commits={mockGitCommits} />
+          <GitGraphVisualization
+            commits={mockGitCommits}
+            selectedCommitSha={null}
+            onClaudeNodeClick={() => {}}
+          />
         </div>
       </div>
     </div>
