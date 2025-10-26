@@ -5,6 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { GitGraphVisualization } from "@/components/git-graph/GitGraphVisualization";
 import { mockGitCommits } from "@/lib/mock-data/git-graph";
 import { Badge } from "@/components/ui/badge";
+import { ConversationView } from "@/components/chat/ConversationView";
+import { getConversation } from "@/lib/mock-data/conversations";
 
 export default function GitPage() {
   const [selectedCommitSha, setSelectedCommitSha] = useState<string | null>(null);
@@ -14,6 +16,11 @@ export default function GitPage() {
     ? mockGitCommits.find((commit) => commit.commit_sha === selectedCommitSha)
     : null;
   const selectedContext = selectedCommit?.claude_context;
+
+  // Get conversation messages for the selected context
+  const conversation = selectedContext
+    ? getConversation(selectedContext.context_id)
+    : null;
 
   return (
     <div className="space-y-6">
@@ -44,8 +51,8 @@ export default function GitPage() {
         {/* Git Diff Placeholder - Takes 1 column on large screens */}
         <Card>
           <CardHeader>
-            <CardTitle>Git Diff</CardTitle>
-            <CardDescription>Changes for selected commit</CardDescription>
+            <CardTitle>Claude Context Diff</CardTitle>
+            <CardDescription>Context diff for given commit</CardDescription>
           </CardHeader>
           <CardContent className="h-[400px]">
             <p className="text-sm text-muted-foreground">
@@ -55,43 +62,33 @@ export default function GitPage() {
         </Card>
       </div>
 
-      {/* Chat/Context Placeholder - Full width below */}
+      {/* Claude Conversation - Full width below */}
       <Card>
         <CardHeader>
           <CardTitle>Claude Conversation</CardTitle>
           <CardDescription>
-            {selectedContext ? "Context details" : "Click a Claude node to view conversation"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="h-[300px]">
-          {selectedContext ? (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">Context ID:</span>
-                <code className="text-sm bg-muted px-2 py-1 rounded">
-                  {selectedContext.context_id}
-                </code>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">Messages:</span>
-                <Badge variant="secondary">{selectedContext.total_messages}</Badge>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">Session Type:</span>
+            {selectedContext ? (
+              <div className="flex items-center gap-3">
+                <span>Context ID: {selectedContext.context_id}</span>
+                <Badge variant="secondary">{conversation?.messages.length || 0} messages</Badge>
                 <Badge variant={selectedContext.new_session ? "default" : "outline"}>
                   {selectedContext.new_session ? "New Session" : "Continuing Session"}
                 </Badge>
               </div>
-              <div className="mt-4 pt-4 border-t">
-                <p className="text-sm text-muted-foreground">
-                  Chat history will be displayed here in the future
-                </p>
-              </div>
-            </div>
+            ) : (
+              "Click a Claude node to view conversation"
+            )}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="h-[500px] p-0">
+          {conversation ? (
+            <ConversationView messages={conversation.messages} />
           ) : (
-            <p className="text-sm text-muted-foreground">
-              Select a Claude context (orange node) to view conversation details
-            </p>
+            <div className="flex items-center justify-center h-full">
+              <p className="text-sm text-muted-foreground">
+                Select a Claude context (orange node) to view conversation details
+              </p>
+            </div>
           )}
         </CardContent>
       </Card>
