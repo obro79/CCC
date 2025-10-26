@@ -21,7 +21,7 @@ export default function GitPage() {
             <CardDescription>Git commits (blue) with Claude contexts (orange)</CardDescription>
           </CardHeader>
           <CardContent className="h-[400px] overflow-auto">
-            <div className="min-w-[600px] h-[800px]">
+            <div className="min-w-[750px] h-[1000px]">
               <GitGraphVisualization commits={mockGitCommits} />
             </div>
           </CardContent>

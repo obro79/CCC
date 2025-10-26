@@ -19,8 +19,8 @@ export default function DashboardPage() {
             <CardTitle>Git Visualization</CardTitle>
             <CardDescription>Your commits and Claude sessions</CardDescription>
           </CardHeader>
-          <CardContent className="h-[600px] flex justify-start">
-            <div className="w-full">
+          <CardContent className="h-[600px] overflow-auto flex justify-start">
+            <div className="min-w-[750px] h-[1000px]">
               <GitGraphVisualization commits={mockGitCommits} />
             </div>
           </CardContent>

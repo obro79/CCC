@@ -22,11 +22,11 @@ export function GitNode({ node }: GitNodeProps) {
 
       {/* 6-character SHA label to the left */}
       <text
-        x={node.x - LAYOUT_CONFIG.NODE_RADIUS - 10}
+        x={node.x - LAYOUT_CONFIG.NODE_RADIUS - 12}
         y={node.y}
         textAnchor="end"
         dominantBaseline="middle"
-        className="text-sm font-mono"
+        className="text-base font-mono"
         fill={LAYOUT_CONFIG.GIT_COLOR}
       >
         {node.commit.commit_sha_short}

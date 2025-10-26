@@ -3,24 +3,25 @@ import { designTokens } from '../design-tokens';
 
 /**
  * Layout configuration for the graph visualization
+ * All values scaled by 1.25x for 125% zoom
  */
 export const LAYOUT_CONFIG = {
   // Node positions
-  GIT_X: 150, // X position for Git nodes
-  CLAUDE_X: 450, // X position for Claude nodes
-  START_Y: 80, // Y position for first commit
-  COMMIT_SPACING: 100, // Vertical spacing between commits
-  CLAUDE_OFFSET_Y: 15, // Claude nodes sit 15px below Git nodes
+  GIT_X: 187.5, // X position for Git nodes
+  CLAUDE_X: 562.5, // X position for Claude nodes
+  START_Y: 100, // Y position for first commit
+  COMMIT_SPACING: 125, // Vertical spacing between commits
+  CLAUDE_OFFSET_Y: 18.75, // Claude nodes sit 18.75px below Git nodes
 
   // Node styling
-  NODE_RADIUS: 8,
+  NODE_RADIUS: 10,
 
   // Colors from design tokens
   GIT_COLOR: '#3b82f6', // Blue
   CLAUDE_COLOR: designTokens.colors.accent.orange, // Orange from design tokens
 
   // Connection curves
-  CURVE_CONTROL_OFFSET: 100, // How far the bezier control points extend
+  CURVE_CONTROL_OFFSET: 125, // How far the bezier control points extend
 };
 
 /**
@@ -200,7 +201,7 @@ export function calculateGraphLayout(commits: GitCommit[]): GraphData {
  * Calculate SVG viewBox dimensions
  */
 export function calculateViewBox(commits: GitCommit[]): string {
-  const width = 600;
-  const height = LAYOUT_CONFIG.START_Y + commits.length * LAYOUT_CONFIG.COMMIT_SPACING + 50;
+  const width = 750; // Scaled from 600 by 1.25x
+  const height = LAYOUT_CONFIG.START_Y + commits.length * LAYOUT_CONFIG.COMMIT_SPACING + 62.5; // 50 * 1.25
   return `0 0 ${width} ${height}`;
 }
