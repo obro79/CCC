@@ -35,7 +35,7 @@ export default function GitPage() {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle>Git + Claude Context Visualization</CardTitle>
-            <CardDescription>Click on orange nodes to view Claude context</CardDescription>
+            <CardDescription>Click on blue nodes (Git commits) or orange nodes (Claude contexts) to view details</CardDescription>
           </CardHeader>
           <CardContent className="h-[400px] overflow-auto">
             <div className="min-w-[750px] h-[1000px]">
@@ -43,6 +43,7 @@ export default function GitPage() {
                 commits={mockGitCommits}
                 selectedCommitSha={selectedCommitSha}
                 onClaudeNodeClick={setSelectedCommitSha}
+                onGitNodeClick={setSelectedCommitSha}
               />
             </div>
           </CardContent>
@@ -76,7 +77,7 @@ export default function GitPage() {
                 </Badge>
               </div>
             ) : (
-              "Click a Claude node to view conversation"
+              "Click a Git commit or Claude context to view conversation"
             )}
           </CardDescription>
         </CardHeader>
@@ -86,7 +87,7 @@ export default function GitPage() {
           ) : (
             <div className="flex items-center justify-center h-full">
               <p className="text-sm text-muted-foreground">
-                Select a Claude context (orange node) to view conversation details
+                Select a Git commit (blue node) or Claude context (orange node) to view details
               </p>
             </div>
           )}

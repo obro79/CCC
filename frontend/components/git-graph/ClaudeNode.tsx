@@ -10,7 +10,9 @@ interface ClaudeNodeProps {
 export function ClaudeNode({ node, isSelected = false, onSelect }: ClaudeNodeProps) {
   if (!node.context || !node.commit) return null;
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (onSelect && node.commit) {
       onSelect(node.commit.commit_sha);
     }

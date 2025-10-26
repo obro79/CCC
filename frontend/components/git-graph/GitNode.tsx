@@ -3,22 +3,53 @@ import { LAYOUT_CONFIG } from '@/lib/utils/graph-layout';
 
 interface GitNodeProps {
   node: GraphNode;
+  isSelected?: boolean;
+  onSelect?: (commitSha: string) => void;
 }
 
-export function GitNode({ node }: GitNodeProps) {
+export function GitNode({ node, isSelected = false, onSelect }: GitNodeProps) {
   if (!node.commit) return null;
 
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onSelect && node.commit) {
+      onSelect(node.commit.commit_sha);
+    }
+  };
+
+  const radius = isSelected ? LAYOUT_CONFIG.NODE_RADIUS * 1.2 : LAYOUT_CONFIG.NODE_RADIUS;
+  const strokeWidth = isSelected ? 4 : 2;
+
   return (
-    <g className="git-node">
+    <g
+      className="git-node cursor-pointer transition-all duration-200 hover:opacity-80"
+      onClick={handleClick}
+    >
       {/* Blue circle */}
       <circle
         cx={node.x}
         cy={node.y}
-        r={LAYOUT_CONFIG.NODE_RADIUS}
+        r={radius}
         fill={LAYOUT_CONFIG.GIT_COLOR}
         stroke="white"
-        strokeWidth={2}
+        strokeWidth={strokeWidth}
+        style={{
+          transition: 'all 0.2s ease-in-out',
+        }}
       />
+      {isSelected && (
+        /* Outer glow ring for selected state */
+        <circle
+          cx={node.x}
+          cy={node.y}
+          r={radius + 4}
+          fill="none"
+          stroke={LAYOUT_CONFIG.GIT_COLOR}
+          strokeWidth={2}
+          opacity={0.5}
+        />
+      )}
 
       {/* 6-character SHA label to the left */}
       <text

@@ -12,12 +12,14 @@ interface GitGraphVisualizationProps {
   commits: GitCommit[];
   selectedCommitSha?: string | null;
   onClaudeNodeClick?: (commitSha: string) => void;
+  onGitNodeClick?: (commitSha: string) => void;
 }
 
 export function GitGraphVisualization({
   commits,
   selectedCommitSha = null,
-  onClaudeNodeClick
+  onClaudeNodeClick,
+  onGitNodeClick
 }: GitGraphVisualizationProps) {
   const graphData = useMemo(() => calculateGraphLayout(commits), [commits]);
   const viewBox = useMemo(() => calculateViewBox(commits), [commits]);
@@ -38,7 +40,12 @@ export function GitGraphVisualization({
 
       {/* Layer 3: Nodes (front) */}
       {graphData.gitNodes.map((node, index) => (
-        <GitNode key={`git-${index}`} node={node} />
+        <GitNode
+          key={`git-${index}`}
+          node={node}
+          isSelected={node.commit?.commit_sha === selectedCommitSha}
+          onSelect={onGitNodeClick}
+        />
       ))}
       {graphData.claudeNodes.map((node, index) => (
         <ClaudeNode
